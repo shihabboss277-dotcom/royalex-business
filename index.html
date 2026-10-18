@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#101827">
+<title>ROYALEX Business</title>
+<style>
+:root{--bg:#0b1220;--panel:#121d30;--line:#26354d;--text:#f3f6fb;--muted:#aab7ca;--gold:#e5bd68;--green:#21a675;--red:#e45d68}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(135deg,#0b1220,#111c2e);color:var(--text);font-family:system-ui,-apple-system,"Noto Sans Bengali",sans-serif}
+.wrap{max-width:1100px;margin:auto;padding:20px}.brand{font-weight:900;letter-spacing:2px;color:var(--gold);font-size:25px}.sub{color:var(--muted);font-size:14px;margin-top:4px}
+.panel{background:rgba(18,29,48,.96);border:1px solid var(--line);border-radius:16px;padding:18px;margin-top:18px;box-shadow:0 12px 30px #0002}
+h1,h2,h3{margin:0 0 12px}h1{font-size:24px}h2{font-size:19px}label{display:block;color:var(--muted);font-size:14px;margin:10px 0 5px}
+input,textarea,select{width:100%;padding:12px;border:1px solid var(--line);border-radius:10px;background:#0b1424;color:var(--text);font:inherit}
+button{border:0;border-radius:10px;padding:11px 15px;background:var(--gold);color:#151b25;font-weight:800;font:inherit;cursor:pointer}
+button.secondary{background:#26354d;color:white}button.danger{background:var(--red);color:white}.row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.notice{padding:12px;border-radius:10px;background:#0b1424;color:var(--muted);margin-top:12px;white-space:pre-wrap}.hidden{display:none!important}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin-top:14px}.item{padding:14px;background:#0b1424;border:1px solid var(--line);border-radius:12px;overflow-wrap:anywhere}.item strong{display:block;margin-bottom:7px}.muted{color:var(--muted);font-size:13px}.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-top:15px}.tabs button{background:#26354d;color:white}.tabs button.active{background:var(--gold);color:#151b25}.section{margin-top:18px}table{width:100%;border-collapse:collapse;margin-top:12px}td,th{text-align:left;padding:10px;border-bottom:1px solid var(--line);font-size:14px}.tablewrap{overflow-x:auto}.small{font-size:12px;color:var(--muted)}
+@media(max-width:600px){.wrap{padding:13px}.row{grid-template-columns:1fr}.panel{padding:14px}.brand{font-size:22px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div><div class="brand">ROYALEX BUSINESS</div><div class="sub">ব্যবসা পরিচালনার অ্যাডমিন প্যানেল</div></div>
+    <button id="logoutBtn" class="secondary hidden">লগআউট</button>
+  </header>
+
+  <section id="loginPanel" class="panel">
+    <h1>অ্যাডমিন লগইন</h1>
+    <p class="sub">আপনার অনুমোদিত অ্যাডমিন ইমেইল দিয়ে প্রবেশ করুন।</p>
+    <label for="email">Gmail / Email</label><input id="email" type="email" autocomplete="username" placeholder="আপনার ইমেইল">
+    <label for="password">Password</label><input id="password" type="password" autocomplete="current-password" placeholder="পাসওয়ার্ড">
+    <div class="actions"><button id="loginBtn">লগইন করুন</button></div>
+    <div id="loginMsg" class="notice">Supabase সেটআপ সম্পন্ন হলে এখানে লগইন করতে পারবেন।</div>
+  </section>
+
+  <section id="dashboard" class="panel hidden">
+    <div class="top"><div><h1>ড্যাশবোর্ড</h1><div id="who" class="sub"></div></div><div class="small">ROYALEX • Admin</div></div>
+    <div class="tabs">
+      <button class="active" data-tab="products">পণ্য</button><button data-tab="customers">কাস্টমার</button><button data-tab="orders">অর্ডার</button>
+    </div>
+    <div id="appMsg" class="notice hidden"></div>
+    <div id="products" class="section">
+      <h2>নতুন পণ্য যোগ করুন</h2>
+      <div class="row">
+        <div><label>পণ্যের নাম *</label><input id="pName" placeholder="যেমন: Bracelet"></div>
+        <div><label>দাম (টাকা)</label><input id="pPrice" type="number" min="0" step="0.01" placeholder="150"></div>
+        <div><label>স্টক / পরিমাণ</label><input id="pStock" type="number" min="0" step="1" value="0"></div>
+        <div><label>ছবির URL (ঐচ্ছিক)</label><input id="pImage" type="url" placeholder="https://..."></div>
+      </div>
+      <label>বর্ণনা (ঐচ্ছিক)</label><textarea id="pDesc" rows="2" placeholder="পণ্যের বিস্তারিত"></textarea>
+      <div class="actions"><button id="saveProduct">পণ্য সেভ করুন</button><button id="refreshProducts" class="secondary">রিফ্রেশ</button></div>
+      <div id="productList" class="cards"></div>
+    </div>
+    <div id="customers" class="section hidden">
+      <h2>কাস্টমার তালিকা</h2><div class="actions"><button id="refreshCustomers" class="secondary">কাস্টমার রিফ্রেশ</button></div><div id="customerList" class="cards"></div>
+    </div>
+    <div id="orders" class="section hidden">
+      <h2>অর্ডার তালিকা</h2><div class="actions"><button id="refreshOrders" class="secondary">অর্ডার রিফ্রেশ</button></div><div id="orderList" class="cards"></div>
+    </div>
+  </section>
+  <p class="small" style="text-align:center;margin:22px 0">GitHub Pages + Supabase • পাসওয়ার্ড বা service_role key কখনো এখানে লিখবেন না।</p>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+/* সেটআপ: নিচের দুইটি মান আপনার Supabase Project Settings → API থেকে বসান.
+   এখানে শুধু Publishable key অথবা anon public key ব্যবহার করবেন, service_role key নয়. */
+const SUPABASE_URL = "PASTE_YOUR_SUPABASE_PROJECT_URL_HERE";
+const SUPABASE_PUBLISHABLE_KEY = "PASTE_YOUR_SUPABASE_PUBLISHABLE_OR_ANON_KEY_HERE";
+let sb = null;
+const $ = id => document.getElementById(id);
+function message(text, login=false){const el=$(login?'loginMsg':'appMsg');el.textContent=text;el.classList.remove('hidden');}
+function safe(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function configured(){return !SUPABASE_URL.includes('PASTE_')&&!SUPABASE_PUBLISHABLE_KEY.includes('PASTE_')&&window.supabase;}
+if(configured()) sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
+else message('প্রথমে index.html ফাইলে Supabase URL এবং Publishable/anon public key বসাতে হবে।',true);
+
+$('loginBtn').addEventListener('click', async()=>{
+ if(!sb){message('Supabase URL ও public key এখনো সেট করা হয়নি।',true);return;}
+ const email=$('email').value.trim(), password=$('password').value;
+ if(!email||!password){message('ইমেইল ও পাসওয়ার্ড লিখুন।',true);return;}
+ $('loginBtn').disabled=true;message('লগইন যাচাই হচ্ছে…',true);
+ try{
+  const {data,error}=await sb.auth.signInWithPassword({email,password});if(error)throw error;
+  const {data:member,error:memberError}=await sb.from('business_members').select('role,approved').eq('user_id',data.user.id).maybeSingle();
+  if(memberError)throw new Error('অ্যাডমিন যাচাই করা যায়নি: '+memberError.message);
+  if(!member||member.role!=='admin'||member.approved!==true){await sb.auth.signOut();throw new Error('এই অ্যাকাউন্টটি অনুমোদিত অ্যাডমিন নয়।');}
+  $('loginPanel').classList.add('hidden');$('dashboard').classList.remove('hidden');$('logoutBtn').classList.remove('hidden');$('who').textContent=data.user.email;
+  message('লগইন সফল! অ্যাডমিন পরিচয় যাচাই হয়েছে।');await Promise.all([loadProducts(),loadCustomers(),loadOrders()]);
+ }catch(e){message(e.message||'লগইন করা যায়নি।',true);}finally{$('loginBtn').disabled=false;}
+});
+$('logoutBtn').addEventListener('click',async()=>{if(sb)await sb.auth.signOut();$('dashboard').classList.add('hidden');$('logoutBtn').classList.add('hidden');$('loginPanel').classList.remove('hidden');message('আপনি লগআউট করেছেন।',true);});
+document.querySelectorAll('[data-tab]').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('[data-tab]').forEach(b=>b.classList.toggle('active',b===btn));['products','customers','orders'].forEach(id=>$(id).classList.toggle('hidden',id!==btn.dataset.tab));}));
+async function loadProducts(){if(!sb)return;try{const {data,error}=await sb.from('products').select('*').order('created_at',{ascending:false});if(error)throw error;$('productList').innerHTML=(data||[]).map(p=>`<div class="item">${p.image_url?`<img src="${safe(p.image_url)}" alt="" style="width:100%;max-height:150px;object-fit:cover;border-radius:8px;margin-bottom:8px">`:''}<strong>${safe(p.name)}</strong><div>দাম: ৳${safe(p.price)}</div><div>স্টক: ${safe(p.stock)}</div><div class="muted">${safe(p.description||'')}</div><div class="actions"><button class="danger" onclick="deleteProduct(${Number(p.id)})">মুছুন</button></div></div>`).join('')||'<div class="muted">এখনো কোনো পণ্য নেই।</div>';}catch(e){message('পণ্য লোড হয়নি: '+e.message);}}
+async function deleteProduct(id){if(!confirm('এই পণ্যটি মুছবেন?'))return;const {error}=await sb.from('products').delete().eq('id',id);if(error)message(error.message);else{message('পণ্য মুছে ফেলা হয়েছে।');loadProducts();}}
+$('saveProduct').addEventListener('click',async()=>{if(!sb)return;const name=$('pName').value.trim();if(!name){message('পণ্যের নাম লিখুন।');return;}const price=Number($('pPrice').value||0),stock=Number($('pStock').value||0);if(price<0||stock<0){message('দাম ও স্টক ০ বা তার বেশি দিন।');return;}const payload={name,price,stock,image_url:$('pImage').value.trim()||null,description:$('pDesc').value.trim()||null};const {error}=await sb.from('products').insert(payload);if(error)message('সেভ হয়নি: '+error.message);else{$('pName').value=$('pPrice').value=$('pImage').value=$('pDesc').value='';$('pStock').value='0';message('পণ্য সেভ হয়েছে।');loadProducts();}});
+$('refreshProducts').addEventListener('click',loadProducts);
+async function loadCustomers(){if(!sb)return;try{const {data,error}=await sb.from('customers').select('*').order('created_at',{ascending:false});if(error)throw error;$('customerList').innerHTML=(data||[]).map(c=>`<div class="item"><strong>${safe(c.name)}</strong><div>ফোন: ${safe(c.phone||'—')}</div><div>ঠিকানা: ${safe(c.address||'—')}</div></div>`).join('')||'<div class="muted">কাস্টমার তালিকা খালি।</div>';}catch(e){message('কাস্টমার লোড হয়নি: '+e.message);}}
+async function loadOrders(){if(!sb)return;try{const {data,error}=await sb.from('orders').select('*').order('created_at',{ascending:false});if(error)throw error;$('orderList').innerHTML=(data||[]).map(o=>`<div class="item"><strong>অর্ডার #${safe(o.id)}</strong><div>কাস্টমার ID: ${safe(o.customer_id||'—')}</div><div>মোট: ৳${safe(o.total_amount)}</div><div>স্ট্যাটাস: ${safe(o.status)}</div><div class="muted">${safe(o.notes||'')}</div></div>`).join('')||'<div class="muted">এখনো কোনো অর্ডার নেই।</div>';}catch(e){message('অর্ডার লোড হয়নি: '+e.message);}}
+$('refreshCustomers').addEventListener('click',loadCustomers);$('refreshOrders').addEventListener('click',loadOrders);
+</script>
+</body></html>
