@@ -96,7 +96,7 @@ label{display:block;color:var(--muted);font-size:13px;margin:10px 0 5px}input,te
 </section>
 <footer class="small" style="text-align:center;margin:20px 0">ROYALEX Business • GitHub Pages + Supabase • কখনো service_role key প্রকাশ করবেন না।</footer>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" onerror="this.onerror=null;this.src='https://unpkg.com/@supabase/supabase-js@2'"></script>
 <script>
 'use strict';
 const SUPABASE_URL="https://xvmeffhjdsxifdbcmtfn.supabase.co";
@@ -205,7 +205,7 @@ $('exportTx').onclick=()=>downloadCSV('royalex-transactions.csv',[['ধরন','
 $('themeBtn').onclick=()=>{const light=document.body.dataset.theme!=='light';document.body.dataset.theme=light?'light':'dark';if(light){document.documentElement.style.setProperty('--bg','#f2f5fa');document.documentElement.style.setProperty('--panel','#ffffff');document.documentElement.style.setProperty('--line','#d4dce8');document.documentElement.style.setProperty('--text','#152033');document.documentElement.style.setProperty('--muted','#58677d');document.body.style.background='#f2f5fa'}else{location.reload()}};
 $('shareApp').onclick=async()=>{try{if(navigator.share)await navigator.share({title:'ROYALEX Business',url:location.href});else{await navigator.clipboard.writeText(location.href);message('ওয়েবসাইটের লিংক কপি হয়েছে।')}}catch(e){}};
 $('installHint').onclick=()=>alert('iPhone: Safari-তে ওয়েবসাইট খুলুন → Share বোতাম → Add to Home Screen। PWA সম্পূর্ণ করতে manifest ও service worker ফাইলও GitHub-এ যোগ করতে হবে।');
-async function init(){try{localTx=JSON.parse(localStorage.getItem('royalex_local_transactions')||'[]')}catch(e){localTx=[]}renderTx();$('txDate').value=new Date().toISOString().slice(0,10);if(!window.supabase){message('Supabase লাইব্রেরি লোড হয়নি। ইন্টারনেট পরীক্ষা করে রিফ্রেশ করুন।',true);return}sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);message('Supabase সংযোগ হয়েছে। লগইন করতে পারবেন।',true);try{const {data,error}=await sb.auth.getSession();if(error)throw error;if(data.session?.user){try{await openAdminDashboard(data.session.user)}catch(e){await sb.auth.signOut();showLogin();message(e.message,true)}}}catch(e){showLogin();message('সেশন যাচাই করা যায়নি: '+e.message,true)}}init();
+async function init(){try{localTx=JSON.parse(localStorage.getItem('royalex_local_transactions')||'[]')}catch(e){localTx=[]}renderTx();$('txDate').value=new Date().toISOString().slice(0,10);let tries=0;while(!window.supabase&&tries<30){await new Promise(r=>setTimeout(r,250));tries++}if(!window.supabase||typeof window.supabase.createClient!=='function'){message('Supabase লাইব্রেরি লোড হয়নি। ইন্টারনেট চালু করে Safari-তে পেজটি আবার খুলুন।',true);return}try{sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);const {data,error}=await sb.auth.getSession();if(error)throw error;message('Supabase প্রস্তুত। লগইন করতে পারবেন।',true);if(data.session?.user){try{await openAdminDashboard(data.session.user)}catch(e){await sb.auth.signOut();showLogin();message(e.message,true)}}}catch(e){sb=null;showLogin();message('Supabase চালু করা যায়নি: '+(e.message||'ইন্টারনেট বা প্রজেক্ট সেটিংস পরীক্ষা করুন'),true)}}init();
 </script>
 </body>
 </html>
