@@ -42,15 +42,15 @@ label{display:block;color:var(--muted);font-size:13px;margin:10px 0 5px}input,te
  <div class="actions"><button id="loginBtn">লগইন করুন</button></div><div id="loginMsg" class="notice">Supabase সংযোগ যাচাই হচ্ছে…</div>
 </section>
 <section id="dashboard" class="hidden">
- <div class="panel"><div class="top"><div><h1>ড্যাশবোর্ড</h1><div id="who" class="sub"></div></div><span class="pill">Private Admin</span></div>
+ <div class="panel"><div id="dashboardHome" class="section"><div class="top"><div><h1>ড্যাশবোর্ড</h1><div id="who" class="sub"></div></div><span class="pill">Private Admin</span></div>
  <div class="stats">
   <div class="stat"><div class="muted">মোট পণ্য</div><div id="statProducts" class="value">—</div></div>
   <div class="stat"><div class="muted">মোট অর্ডার</div><div id="statOrders" class="value">—</div></div>
   <div class="stat"><div class="muted">পণ্যের স্টক</div><div id="statStock" class="value">—</div></div>
   <div class="stat"><div class="muted">অর্ডারের মোট</div><div id="statSales" class="value">৳ —</div></div>
  </div>
- <div id="appMsg" class="notice hidden"></div>
-  <div id="shop" class="section"><h2>পণ্য দেখুন</h2><div style="display:flex;gap:8px;flex-wrap:wrap;margin:12px 0"><button data-shop-type="all">সব পণ্য</button><button class="secondary" data-shop-type="royalex">ব্রেসলেট</button><button class="secondary" data-shop-type="clothing">কাপড়</button></div><div id="shopList" class="cards"></div><p class="muted">পণ্য যোগ, এডিট বা ডিলিট করতে ☰ মেনু থেকে পণ্য ম্যানেজমেন্ট খুলুন।</p></div>
+ <div id="appMsg" class="notice hidden"></div></div>
+  <div id="shop" class="section hidden"><h2>পণ্য দেখুন</h2><div style="display:flex;gap:8px;flex-wrap:wrap;margin:12px 0"><button data-shop-type="all">সব পণ্য</button><button class="secondary" data-shop-type="royalex">ব্রেসলেট</button><button class="secondary" data-shop-type="clothing">কাপড়</button></div><div id="shopList" class="cards"></div><p class="muted">পণ্য যোগ, এডিট বা ডিলিট করতে ☰ মেনু থেকে পণ্য ম্যানেজমেন্ট খুলুন।</p></div>
   <div id="products" class="section hidden"><h2>পণ্য ম্যানেজমেন্ট</h2>
   <div class="row">
    <div><label>ব্যবসা</label><select id="pBusiness"><option value="royalex">ROYALEX Bracelets</option><option value="clothing">Clothing Business</option></select></div>
@@ -114,18 +114,10 @@ function money(v){return '৳'+Number(v||0).toLocaleString('en-BD',{maximumFract
 function showLogin(){$('loginPanel').classList.remove('hidden');$('dashboard').classList.add('hidden');$('menuToggle').classList.add('hidden');$('menuPop').classList.add('hidden');$('logoutBtn').classList.add('hidden')}
 function showDashboard(user){$('loginPanel').classList.add('hidden');$('dashboard').classList.remove('hidden');$('menuToggle').classList.remove('hidden');$('menuPop').classList.add('hidden');$('logoutBtn').classList.remove('hidden');$('who').textContent=user.email||''}
 function setTab(id){
- const sections=['shop','products','orders','customers','balance','reports','settings'];
- sections.forEach(x=>$(x).classList.toggle('hidden',id!=='dashboardHome'&&x!==id));
+ const sections=['dashboardHome','shop','products','orders','customers','balance','reports','settings'];
+ sections.forEach(x=>{const el=$(x);if(el)el.classList.toggle('hidden',x!==id)});
  $('menuPop').classList.add('hidden');
- if(id==='dashboardHome'){
-   const dash=$('dashboard').querySelector('.panel');
-   if(dash)dash.classList.remove('hidden');
-   $('orderDetailPanel').classList.add('hidden');
-   window.scrollTo({top:0,behavior:'smooth'});
- } else {
-   const dash=$('dashboard').querySelector(':scope > .panel');
-   if(dash)dash.classList.remove('hidden');
- }
+ if(id==='dashboardHome'){$('orderDetailPanel').classList.add('hidden');window.scrollTo({top:0,behavior:'smooth'})}
  if(id==='shop')renderShop();
  if(id==='products')renderProducts();
  if(id==='orders')loadOrders();
@@ -152,7 +144,7 @@ function renderOrders(){
  const c=customers.find(x=>String(x.id)===String(o.customer_id))||{};
  const name=o.customer_name||c.name||'—', phone=o.phone||c.phone||'—', address=o.address||c.address||'—';
  const status=String(o.status||'pending').toLowerCase();
- return `<div class="item"><strong>অর্ডার #${safe(o.order_number||o.id)}</strong><div>👤 ${safe(name)}</div><div>📞 ${safe(phone)}</div><div>📍 ${safe(address)}</div><div>মোট: ${money(o.total_amount)}</div><div>পরিশোধ: ${money(o.paid_amount||0)} • বাকি: ${money(Math.max(0,Number(o.total_amount||0)-Number(o.paid_amount||0)))}</div><div>স্ট্যাটাস: <span class="pill">${safe(status)}</span></div><div class="actions"><button data-detail="${safe(o.id)}">বিস্তারিত</button><button data-status="${safe(o.id)}" data-next="confirm" ${status==='confirm'||status==='confirmed'||status==='cancel'||status==='cancelled'||status==='return'||status==='returned'?'disabled':''}>Confirm</button><button class="secondary" data-status="${safe(o.id)}" data-next="cancel" ${status==='cancel'||status==='cancelled'||status==='return'||status==='returned'?'disabled':''}>Cancel</button><button class="secondary" data-status="${safe(o.id)}" data-next="return" ${status!=='confirm'&&status!=='confirmed'?'disabled':''}>Return</button><button class="secondary" data-receipt="${safe(o.id)}">রসিদ</button></div></div>`
+ return `<div class="item"><strong>অর্ডার #${safe(o.order_number||o.id)}</strong><div>👤 ${safe(name)}</div><div>📞 ${safe(phone)}</div><div>📍 ${safe(address)}</div><div>পণ্য: ${safe(products.find(p=>String(p.id)===String(o.product_id))?.name||'—')} • পরিমাণ: ${safe(o.quantity??'—')}</div><div>মোট: ${money(o.total_amount)}</div><div>পরিশোধ: ${money(o.paid_amount||0)} • বাকি: ${money(Math.max(0,Number(o.total_amount||0)-Number(o.paid_amount||0)))}</div><div>স্ট্যাটাস: <span class="pill">${safe(status)}</span></div><div class="actions"><button data-detail="${safe(o.id)}">বিস্তারিত</button><button data-status="${safe(o.id)}" data-next="confirm" ${status==='confirm'||status==='confirmed'||status==='cancel'||status==='cancelled'||status==='return'||status==='returned'?'disabled':''}>Confirm</button><button class="secondary" data-status="${safe(o.id)}" data-next="cancel" ${status==='cancel'||status==='cancelled'||status==='return'||status==='returned'?'disabled':''}>Cancel</button><button class="secondary" data-status="${safe(o.id)}" data-next="return" ${status!=='confirm'&&status!=='confirmed'?'disabled':''}>Return</button><button class="secondary" data-receipt="${safe(o.id)}">রসিদ</button></div></div>`
  }).join('')||'<div class="empty">এখনো কোনো অর্ডার নেই।</div>';
  document.querySelectorAll('[data-status]').forEach(b=>b.onclick=()=>changeOrderStatus(b.dataset.status,b.dataset.next));
  document.querySelectorAll('[data-receipt]').forEach(b=>b.onclick=()=>receiptOrder(b.dataset.receipt));
@@ -165,7 +157,7 @@ function showOrderDetail(id){
  const o=orders.find(x=>String(x.id)===String(id));if(!o)return;activeOrderId=o.id;
  const c=customers.find(x=>String(x.id)===String(o.customer_id))||{};
  const name=o.customer_name||c.name||'—',phone=o.phone||c.phone||'—',address=o.address||c.address||'—';
- $('orderDetailBody').innerHTML=`<div class="cards"><div class="item"><strong>অর্ডার নম্বর</strong>${safe(o.order_number||o.id)}</div><div class="item"><strong>কাস্টমার</strong>${safe(name)}</div><div class="item"><strong>ফোন</strong>${safe(phone)}</div><div class="item"><strong>ঠিকানা</strong>${safe(address)}</div><div class="item"><strong>ব্যবসা</strong>${safe(o.business_type||'—')}</div><div class="item"><strong>মোট</strong>${money(o.total_amount)}</div><div class="item"><strong>পরিশোধ</strong>${money(o.paid_amount||0)}</div><div class="item"><strong>বাকি</strong>${money(Math.max(0,Number(o.total_amount||0)-Number(o.paid_amount||0)))}</div><div class="item"><strong>স্ট্যাটাস</strong>${safe(o.status||'pending')}</div><div class="item"><strong>তারিখ</strong>${safe(o.created_at||'—')}</div><div class="item"><strong>নোট</strong>${safe(o.notes||'—')}</div></div><p class="notice">এই ডেটাবেস সংস্করণে অর্ডারের পৃথক পণ্য-লাইন সংরক্ষিত আছে কি না নিশ্চিত নয়। তাই এখানে নিশ্চিত না হওয়া পণ্যের বিবরণ বানিয়ে দেখানো হচ্ছে না।</p>`;
+ $('orderDetailBody').innerHTML=`<div class="cards"><div class="item"><strong>অর্ডার নম্বর</strong>${safe(o.order_number||o.id)}</div><div class="item"><strong>কাস্টমার</strong>${safe(name)}</div><div class="item"><strong>ফোন</strong>${safe(phone)}</div><div class="item"><strong>ঠিকানা</strong>${safe(address)}</div><div class="item"><strong>ব্যবসা</strong>${safe(o.business_type||'—')}</div><div class="item"><strong>পণ্য</strong>${safe(products.find(p=>String(p.id)===String(o.product_id))?.name||'—')}</div><div class="item"><strong>পরিমাণ</strong>${safe(o.quantity??'—')}</div><div class="item"><strong>মোট</strong>${money(o.total_amount)}</div><div class="item"><strong>পরিশোধ</strong>${money(o.paid_amount||0)}</div><div class="item"><strong>বাকি</strong>${money(Math.max(0,Number(o.total_amount||0)-Number(o.paid_amount||0)))}</div><div class="item"><strong>স্ট্যাটাস</strong>${safe(o.status||'pending')}</div><div class="item"><strong>তারিখ</strong>${safe(o.created_at||'—')}</div><div class="item"><strong>নোট</strong>${safe(o.notes||'—')}</div></div><p class="notice">এই ডেটাবেস সংস্করণে অর্ডারের পৃথক পণ্য-লাইন সংরক্ষিত আছে কি না নিশ্চিত নয়। তাই এখানে নিশ্চিত না হওয়া পণ্যের বিবরণ বানিয়ে দেখানো হচ্ছে না।</p>`;
  $('orderDetailPanel').classList.remove('hidden');$('detailConfirm').disabled=['confirm','confirmed','cancel','cancelled','return','returned'].includes(String(o.status||'pending').toLowerCase());$('detailCancel').disabled=['cancel','cancelled','return','returned'].includes(String(o.status||'pending').toLowerCase());$('detailReturn').disabled=!['confirm','confirmed'].includes(String(o.status||'pending').toLowerCase());
  $('detailConfirm').onclick=()=>changeOrderStatus(o.id,'confirm');$('detailCancel').onclick=()=>changeOrderStatus(o.id,'cancel');$('detailReturn').onclick=()=>changeOrderStatus(o.id,'return');$('detailReceipt').onclick=()=>receiptOrder(o.id);
  $('orderDetailPanel').scrollIntoView({behavior:'smooth',block:'start'});
@@ -177,8 +169,26 @@ async function changeOrderStatus(id,status){
  if(status==='cancel'&&['cancel','cancelled','return','returned'].includes(current)){message('এই অর্ডার ইতিমধ্যে বাতিল/রিটার্ন হয়েছে।');return}
  if(status==='return'&&!['confirm','confirmed'].includes(current)){message('শুধু Confirm করা অর্ডার Return করা যাবে।');return}
  const label={confirm:'কনফার্ম',cancel:'বাতিল',return:'রিটার্ন'}[status]||status;
- if(!confirm(`অর্ডারটি ${label} করবেন? স্ট্যাটাস আপডেট হবে। এই HTML-only action নিজে থেকে stock/payment ledger সমন্বয় নিশ্চিত করে না।`))return;
- try{const {error}=await sb.from('orders').update({status}).eq('id',id);if(error)throw error;message(`অর্ডার ${label} হয়েছে।`);await loadOrders();if(activeOrderId!==null)showOrderDetail(activeOrderId)}catch(e){message('স্ট্যাটাস বদলানো যায়নি: '+e.message)}
+ if(status==='confirm'&&(!o.product_id||!Number(o.quantity))){message('এই অর্ডারে পণ্য ID/পরিমাণ সংরক্ষিত নেই, তাই স্টক নিরাপদে কমানো যাচ্ছে না। নতুন অর্ডার তৈরি করে আবার চেষ্টা করুন।');return}
+ if(!confirm(`অর্ডারটি ${label} করবেন? ${status==='confirm'?'স্টক থেকে অর্ডারের পরিমাণ কমানো হবে।':status==='return'?'রিটার্ন করলে স্টক ফেরত যোগ হবে.':'স্টক অপরিবর্তিত থাকবে।'}`))return;
+ let stockChanged=false,product=null,oldStock=0;
+ try{
+   if(status==='confirm'||status==='return'){
+     product=products.find(p=>String(p.id)===String(o.product_id));
+     if(!product)throw Error('অর্ডারের পণ্য তালিকায় পাওয়া যায়নি। আগে পণ্য রিফ্রেশ করুন।');
+     oldStock=Number(product.stock||0);const qty=Number(o.quantity||0);
+     const nextStock=status==='confirm'?oldStock-qty:oldStock+qty;
+     if(status==='confirm'&&nextStock<0)throw Error(`স্টক যথেষ্ট নেই। বর্তমান স্টক ${oldStock}, অর্ডার ${qty} টি।`);
+     const {error:stockError}=await sb.from('products').update({stock:nextStock}).eq('id',product.id);
+     if(stockError)throw stockError;stockChanged=true;
+   }
+   const {error}=await sb.from('orders').update({status}).eq('id',id);if(error)throw error;
+   message(`অর্ডার ${label} হয়েছে${stockChanged?' এবং স্টক আপডেট হয়েছে।':'।'}`);
+   await Promise.allSettled([loadProducts(),loadOrders()]);if(activeOrderId!==null)showOrderDetail(activeOrderId);
+ }catch(e){
+   if(stockChanged&&product){try{await sb.from('products').update({stock:oldStock}).eq('id',product.id)}catch(rollbackError){}}
+   message('স্ট্যাটাস/স্টক আপডেট হয়নি: '+e.message+'। নিশ্চিত করুন orders টেবিলে product_id ও quantity কলাম আছে।');
+ }
 }
 function receiptOrder(id){
  const o=orders.find(x=>String(x.id)===String(id));if(!o)return;
@@ -194,8 +204,8 @@ const category=$('pBusiness').value;const desc=$('pDesc').value.trim();const pay
 let result;if(editingProductId)result=await sb.from('products').update(payload).eq('id',editingProductId);else result=await sb.from('products').insert(payload);if(result.error)throw result.error;message(editingProductId?'পণ্যের পরিবর্তন সেভ হয়েছে।':'পণ্য সেভ হয়েছে!');resetProductForm();await loadProducts()}catch(e){message('পণ্য সেভ হয়নি: '+e.message)}finally{b.disabled=false}}
 function resetProductForm(){$('pName').value='';$('pSku').value='';$('pCost').value='';$('pPrice').value='';$('pStock').value='0';$('pSize').value='';$('pColor').value='';$('pDesc').value='';$('pImageFile').value='';$('pPreview').removeAttribute('src');$('pPreview').classList.add('hidden');editingProductId=null;$('saveProduct').textContent='পণ্য সেভ করুন';$('cancelEdit').classList.add('hidden')}
 async function saveOrder(){const name=$('oName').value.trim(),product=products.find(p=>String(p.id)===$('oProduct').value),qty=Number($('oQty').value||1),price=Number($('oPrice').value||0),delivery=Number($('oDelivery').value||0),discount=Number($('oDiscount').value||0),paid=Number($('oPaid').value||0);if(!name){message('গ্রাহকের নাম লিখুন।');return}if(!product){message('আগে একটি পণ্য যোগ করুন।');return}if(qty<1||price<0||delivery<0||discount<0||paid<0){message('পরিমাণ ও টাকার মান পরীক্ষা করুন।');return}const total=Math.max(0,qty*price+delivery-discount);const b=$('saveOrder');b.disabled=true;try{let customerId=null;const phone=$('oPhone').value.trim();if(phone){const existing=customers.find(c=>String(c.phone||'').trim()===phone);if(existing)customerId=existing.id}if(!customerId){const c={name,phone:phone||null,address:$('oAddress').value.trim()||null};const cr=await sb.from('customers').insert(c).select('id').single();if(cr.error)throw cr.error;customerId=cr.data.id}
-const payload={customer_id:customerId,total_amount:total,paid_amount:paid,status:'pending',notes:$('oNotes').value.trim()||null};try{payload.customer_name=name;payload.phone=phone||null;payload.order_number='RX-'+Date.now().toString().slice(-8)}catch(e){}
-const or=await sb.from('orders').insert(payload);if(or.error)throw or.error;message('অর্ডার সেভ হয়েছে। এটি Pending আছে; Confirm করলে স্টক পরিবর্তনের জন্য ডেটাবেস-সাইড নিয়ম দরকার।');['oName','oPhone','oAddress','oNotes'].forEach(id=>$(id).value='');$('oQty').value='1';$('oPrice').value='';$('oDelivery').value='0';$('oDiscount').value='0';$('oPaid').value='0';await Promise.allSettled([loadOrders(),loadCustomers()])}catch(e){message('অর্ডার সেভ হয়নি: '+e.message+' — আপনার orders/customers টেবিলের কলাম ভিন্ন হতে পারে।')}finally{b.disabled=false}}
+const payload={customer_id:customerId,product_id:product.id,quantity:qty,total_amount:total,paid_amount:paid,status:'pending',notes:$('oNotes').value.trim()||null};try{payload.customer_name=name;payload.phone=phone||null;payload.address=$('oAddress').value.trim()||null;payload.business_type=$('oBusiness').value;payload.order_number='RX-'+Date.now().toString().slice(-8)}catch(e){}
+const or=await sb.from('orders').insert(payload);if(or.error)throw or.error;message('অর্ডার সেভ হয়েছে। Pending অর্ডারে স্টক কমবে না; Confirm করলে স্টক কমবে।');['oName','oPhone','oAddress','oNotes'].forEach(id=>$(id).value='');$('oQty').value='1';$('oPrice').value='';$('oDelivery').value='0';$('oDiscount').value='0';$('oPaid').value='0';await Promise.allSettled([loadOrders(),loadCustomers()])}catch(e){message('অর্ডার সেভ হয়নি: '+e.message+' — আপনার orders/customers টেবিলের কলাম ভিন্ন হতে পারে।')}finally{b.disabled=false}}
 function updateReports(){const expenses=localTx.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);$('rExpenses').textContent=money(expenses);$('rSales').textContent=money(orders.filter(o=>!['cancel','cancelled','return','returned'].includes(String(o.status).toLowerCase())).reduce((s,o)=>s+Number(o.total_amount||0),0))}
 function renderTx(){const el=$('txList');const acct={cash:'নগদ',bkash:'bKash',nagad:'Nagad',bank:'ব্যাংক'};const totals={cash:0,bkash:0,nagad:0,bank:0};let income=0,expense=0;localTx.forEach(t=>{const a=totals[t.account||'cash']!==undefined?(t.account||'cash'):'cash';const n=Number(t.amount||0);if(t.type==='expense'){totals[a]-=n;expense+=n}else{totals[a]+=n;if(t.type==='income')income+=n}});$('balTotal').textContent=money(Object.values(totals).reduce((a,b)=>a+b,0));$('balIncome').textContent=money(income);$('balExpense').textContent=money(expense);$('balCount').textContent=String(localTx.length);$('balCash').textContent=money(totals.cash);$('balBkash').textContent=money(totals.bkash);$('balNagad').textContent=money(totals.nagad);$('balBank').textContent=money(totals.bank);el.innerHTML=localTx.map((t,i)=>`<div class="item"><strong>${t.type==='expense'?'খরচ':t.type==='opening'?'শুরুর ব্যালেন্স':'আয় / জমা'}: ${money(t.amount)}</strong><div>অ্যাকাউন্ট: ${safe(acct[t.account||'cash']||'নগদ')} • ${safe(t.reason)} • ${safe(t.date)}</div><button class="danger" data-txdel="${i}">মুছুন</button></div>`).join('')||'<div class="empty">এখনো লেনদেন নেই। প্রথমে শুরুর ব্যালেন্স যোগ করুন।</div>';document.querySelectorAll('[data-txdel]').forEach(b=>b.onclick=()=>{if(!confirm('এই লেনদেন মুছবেন? ব্যালেন্স আবার হিসাব হবে।'))return;localTx.splice(Number(b.dataset.txdel),1);saveLocalTx();renderTx();updateReports()})}
 function saveLocalTx(){try{localStorage.setItem('royalex_local_transactions',JSON.stringify(localTx))}catch(e){}}
