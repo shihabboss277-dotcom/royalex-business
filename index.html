@@ -46,6 +46,50 @@ input,textarea,select{background:#08111e;border-color:#2c3b50;border-radius:12px
 @media(min-width:760px){.stats{grid-template-columns:repeat(4,minmax(0,1fr))}.cards{grid-template-columns:repeat(3,minmax(0,1fr))}#loginPanel{min-height:520px}}
 @media(max-width:520px){.wrap{padding:10px 10px 25px}.cards{grid-template-columns:repeat(2,minmax(0,1fr))}.item{padding:8px;font-size:13px}.item .actions button{font-size:12px;padding:8px 9px}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.stat .value{font-size:21px}.tabs{display:none}body{padding-bottom:90px}.bottom-nav{display:grid}#loginPanel{margin-top:15px;min-height:calc(100dvh - 150px)}}
 
+
+/* Final mobile fit: keep every screen inside the phone width */
+html{width:100%;max-width:100%;overflow-x:hidden;-webkit-text-size-adjust:100%;}
+body{width:100%;max-width:100%;min-width:0;overflow-x:hidden;}
+.wrap,#dashboard,#loginPanel,.panel,.section,.top,.row,.cards,.stats,.item{min-width:0;max-width:100%;}
+img,video,canvas,svg{max-width:100%;}
+input,textarea,select,button{max-width:100%;min-width:0;}
+.tablewrap{max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.bottom-nav{display:none!important;}
+body.admin-ready .bottom-nav{display:grid!important;}
+@media(max-width:520px){
+  body{font-size:14px;padding-bottom:calc(76px + env(safe-area-inset-bottom));}
+  .wrap{width:100%;padding:8px 8px 18px;margin:0;}
+  header.top{margin:-8px -8px 9px;padding:9px 8px;gap:7px;}
+  .brand{font-size:clamp(17px,5vw,22px);letter-spacing:1.2px;}
+  .panel{padding:10px;border-radius:14px;margin-top:10px;}
+  #loginPanel{width:100%;max-width:420px;margin:12px auto;padding:18px 14px;min-height:0;}
+  #loginPanel:before{font-size:48px;}
+  #loginPanel h1{font-size:25px;letter-spacing:1px;}
+  h1{font-size:20px;}h2,.section h2{font-size:17px;}h3{font-size:15px;}
+  .cards{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;}
+  .item{padding:7px;border-radius:12px;font-size:12px;}
+  .product-image{height:100px;}
+  #shopList .item img{height:100px!important;}
+  .stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;}
+  .stat{min-height:88px;padding:10px;border-radius:12px;overflow-wrap:anywhere;}
+  .stat .value{font-size:clamp(16px,4.5vw,21px);overflow-wrap:anywhere;}
+  .row{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;}
+  input,textarea,select{font-size:16px;padding:10px;min-height:41px;}
+  button{font-size:13px;padding:9px 10px;overflow-wrap:anywhere;}
+  .actions{gap:6px;}
+  .bottom-nav{grid-template-columns:repeat(5,minmax(0,1fr));padding:5px 2px calc(5px + env(safe-area-inset-bottom));}
+  .bottom-nav button{font-size:9px;padding:6px 0;white-space:normal;line-height:1.15;}
+  .bottom-nav button span{font-size:17px;}
+  td,th{padding:7px;font-size:12px;}
+}
+@media(max-width:360px){
+ .wrap{padding-left:6px;padding-right:6px;}
+ .cards{gap:5px}.item{padding:6px;font-size:11px;}
+ .product-image,#shopList .item img{height:84px!important;}
+ .bottom-nav button{font-size:8px;}
+ .row{grid-template-columns:minmax(0,1fr);}
+}
+
 </style>
 </head>
 <body>
@@ -143,8 +187,8 @@ const $=id=>document.getElementById(id);let sb=null,products=[],customers=[],ord
 function message(text,login=false){const el=$(login?'loginMsg':'appMsg');el.textContent=text;el.classList.remove('hidden')}
 function safe(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function money(v){return '৳'+Number(v||0).toLocaleString('en-BD',{maximumFractionDigits:2})}
-function showLogin(){$('bottomNav').style.display='none';$('loginPanel').classList.remove('hidden');$('dashboard').classList.add('hidden');$('menuToggle').classList.add('hidden');$('menuPop').classList.add('hidden');$('logoutBtn').classList.add('hidden')}
-function showDashboard(user){$('bottomNav').style.display='';$('loginPanel').classList.add('hidden');$('dashboard').classList.remove('hidden');$('menuToggle').classList.remove('hidden');$('menuPop').classList.add('hidden');$('logoutBtn').classList.remove('hidden');$('who').textContent=user.email||''}
+function showLogin(){document.body.classList.remove('admin-ready');$('bottomNav').style.display='none';$('loginPanel').classList.remove('hidden');$('dashboard').classList.add('hidden');$('menuToggle').classList.add('hidden');$('menuPop').classList.add('hidden');$('logoutBtn').classList.add('hidden')}
+function showDashboard(user){document.body.classList.add('admin-ready');$('bottomNav').style.display='';$('loginPanel').classList.add('hidden');$('dashboard').classList.remove('hidden');$('menuToggle').classList.remove('hidden');$('menuPop').classList.add('hidden');$('logoutBtn').classList.remove('hidden');$('who').textContent=user.email||''}
 function setTab(id){
  const sections=['dashboardHome','shop','products','orders','customers','delivery','balance','reports','settings'];
  sections.forEach(x=>{const el=$(x);if(el)el.classList.toggle('hidden',x!==id)});
